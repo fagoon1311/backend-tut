@@ -14,4 +14,3 @@ connectDB().then(()=>{
 }).catch((err)=>{
     console.log("MONGO DB Connection failed:", err)
 })
- 
