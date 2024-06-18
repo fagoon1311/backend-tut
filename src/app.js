@@ -25,4 +25,15 @@ app.use(express.static('public')) // to store some public assets to store any ki
 
 app.use(cookieParser()) //to access cookies of brower of an user.
 
+
+// routes import
+import userRouter from './routes/user.routes.js'
+
+// routes declare
+// here we can not use app .get because when we made a basic proj the routes was defined within the file. npw we need middlewares.
+app.use("/api/v1/users", userRouter)  // this is a std pratice to use api/v1 prefix. here we are saying that on users router give control to userRouter.
+// which will then give control to as per URl
+
 export { app }
+
+
