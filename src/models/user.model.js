@@ -56,7 +56,7 @@ const userSchema = new Schema({
 // this has one problem that whwver anysave action is there not particular for password it will run. we need to make it run fo only one n only pswrd.
 userSchema.pre("save", async function(next){
     if(!this.isModified("password")) return 
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 }) // since encryption takes time so its better to use async
 
