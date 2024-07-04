@@ -32,7 +32,8 @@ const registerUser = asyncHandler( async (req, res)=>{
     }
 
     // check if user exists already.
-    const existingUser = User.findOne({
+    // we can umport our user model since its created using mongoose it provides us with diff methiods.
+    const existingUser = await User.findOne({
         $or:[{username},{email}]  // this is a way to seaarch for multiple fields. (we can seearch wfor single field as well.)
     })
 
@@ -42,12 +43,17 @@ const registerUser = asyncHandler( async (req, res)=>{
 
     // images , avatars
     const avatarLocalPath = req.files?.avatar[0]?.path //given by multer to handle files.  here multer middle ware will take file to our local server and provide us with the file name.
-    const coverImageLocalPath = req.files?.coverImage[0]?.path
+ //   const coverImageLocalPath = req.files?.coverImage[0]?.path
+
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
     
     if(!avatarLocalPath) {
-        throw new ApiError(400, "Avatar is required")
-    
+        throw new ApiError(400, "Avatar is required") 
     }
+
 
     // upload to cloudinary
     const avatar = await uploadImageToCloudinary(avatarLocalPath) // image size could take time to upload so we need an await.

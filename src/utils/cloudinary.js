@@ -7,7 +7,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 
-async function uploadImageToCloudinary() {
+async function uploadImageToCloudinary(localFilePath) {
     // Configuration
     cloudinary.config({ 
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -16,7 +16,6 @@ async function uploadImageToCloudinary() {
     });
     
     // Path to the image file on your local server
-    const localFilePath = 'path/to/your/local/image.jpg';
     
     try {
         // Check if the file exists
@@ -40,4 +39,4 @@ async function uploadImageToCloudinary() {
 }
 
 // Call the function
-uploadImageToCloudinary();
+export {uploadImageToCloudinary};
