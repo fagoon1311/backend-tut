@@ -18,7 +18,9 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 const generateAccessAndRefreshTokens = async(userId) => {
     try {
         const user = await User.findById(userId)
+        
         const accessToken = user.generateAccessToken()
+        
         const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
@@ -108,7 +110,7 @@ const loginUser = asyncHandler(async (req, res)=>{
     // acces and refreshtoken
     // send cookies
     const {email, username, password} = req.body
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400, "username or email is required")
     }
     const user = await User.findOne({
@@ -132,6 +134,8 @@ const loginUser = asyncHandler(async (req, res)=>{
         httpOnly: true,
         secure: true   // these two allow cookies to not be mutable via front end. Can only be done viea the server
     }
+
+    console.log(res)
     return res
     .status(200)
     .cookie("accessToken", accessToken, options)

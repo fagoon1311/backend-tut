@@ -68,24 +68,26 @@ userSchema.methods.isPasswordCorrect = async function (password){
 }
 
 // These are JWT tokens.
-userSchema.methods.generateAccessToken = function(){
+userSchema.methods.generateAccessToken = function () {    
     return jwt.sign(
-        {
+      {
         _id: this._id,
-        email:this.email,
-        username:this.username,
-        fullName:this.fullName
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-        }
-    )
-}
+        email: this.email,
+        username: this.username,
+        fullName: this.fullName,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1d", // Default to 1 hour if not set
+      }
+    );
+  };
+
 userSchema.methods.generateRefreshToken = function(){
+    
     return jwt.sign(
         {
-        _id: this._id,
+        _id: this._id, 
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
