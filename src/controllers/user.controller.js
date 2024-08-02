@@ -3,6 +3,7 @@ import {ApiError} from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { uploadImageToCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import { stringify } from "flatted"
 
 // Steps to write controller/logic for registering user.
 // 1) get user details from frontend. (we can use postman.)
@@ -128,27 +129,30 @@ const loginUser = asyncHandler(async (req, res)=>{
 
     const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
 
-    const loggedInUSer = User.findById(user._id).select("-password -refreshToken")
+    const loggedInUser = User.findById(user._id).select("-password -refreshToken")
 
     const options = {
         httpOnly: true,
         secure: true   // these two allow cookies to not be mutable via front end. Can only be done viea the server
     }
 
-    console.log(res)
+    
     return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-        new ApiResponse(
-            200, 
-            {
-                user: loggedInUSer, accessToken, refreshToken
-            },
-            "User logged in Succesfully"
-        )
-    )
+  .status(200)
+  .cookie("accessToken", accessToken, options)
+  .cookie("refreshToken", refreshToken, options)
+  .json(
+    JSON.parse(stringify(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken
+        },
+        "User logged in Successfully"
+      )
+    )))
 
 })
 
@@ -170,6 +174,11 @@ const logoutUser = asyncHandler(async(req, res) => {
             new: true // this sennds new values that are updated
         }
     )
+    const options = {
+        httpOnly: true,
+        secure: true   // these two allow cookies to not be mutable via front end. Can only be done viea the server
+    }
+
     return res
     .status(200)
     .clearCookie("accessToken", options)
