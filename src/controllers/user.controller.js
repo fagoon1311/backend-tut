@@ -5,6 +5,7 @@ import { uploadImageToCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { stringify } from "flatted"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 // Steps to write controller/logic for registering user.
 // 1) get user details from frontend. (we can use postman.)
@@ -397,6 +398,58 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
     )
 })
 
+const getWatchHistory = asyncHandler(async(req, res)=>{
+    const user = await User.aggregate([
+        {
+            $match: {
+               // _id : req.user._id // this will not worl becasue generally mongoose convertts the id object to stirng for us auto but here in agg pipeline mongoose does not work so we have to convert ourself.
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as:"owner",
+                            pipeline: [
+                                {
+                                    $project:{
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                       $addFields:{
+                        owner:{                     // the pipeline return an array where the first element will be the required object.
+                                                    // to facilitate we can provide that directly so that front end may use it without 
+                                                    // any loop accessing.
+                            $first:"$owner"
+                        }
+                       } 
+                    }
+                ]
+            }
+        },
+        
+    ])
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, user[0].watchHistory, "Watch history fetched successfully.")
+    )
+})
 export {
     getUserChannelProfile,
     registerUser, 
@@ -407,5 +460,6 @@ export {
     getCurrentUser, 
     updateAccountDetails, 
     updateUserAvatar,
-    updateUserCover
+    updateUserCover,
+    getWatchHistory
 }
